@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import {  AnimatePresence } from 'framer-motion';
 import { 
   Package, Clock, CheckCircle, AlertCircle, 
   ExternalLink, Hash, LogOut, User 
@@ -13,7 +13,7 @@ const UserDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [userName, setUserName] = useState('');
     const navigate = useNavigate();
-
+    
     // 1. THE LOGOUT ENGINE
     const handleLogout = async () => {
         const { error } = await supabase.auth.signOut();
@@ -26,7 +26,6 @@ const UserDashboard = () => {
     };
 
     useEffect(() => {
-        if (!motion) return null;
         const fetchUserOrders = async () => {
             setLoading(true);
             const { data: { user } } = await supabase.auth.getUser();
