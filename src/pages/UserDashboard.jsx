@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import {  AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Package, Clock, CheckCircle, AlertCircle, 
   ExternalLink, Hash, LogOut, User 
 } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
-
 const UserDashboard = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,6 +15,7 @@ const UserDashboard = () => {
     
     // 1. THE LOGOUT ENGINE
     const handleLogout = async () => {
+        if (!motion) return null;
         const { error } = await supabase.auth.signOut();
         if (!error) {
             // Zehaha! Successfully left the Spine.
