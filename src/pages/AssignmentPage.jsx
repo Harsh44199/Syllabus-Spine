@@ -23,14 +23,12 @@ const AssignmentPage = () => {
   const [debugError, setDebugError] = useState(null);
 
   // --- DEADLINE CONSTRAINTS ---
-  // Min: Today + 3 Days
   const minDeadlineDate = useMemo(() => {
     const date = new Date();
     date.setDate(date.getDate() + 3);
     return date.toISOString().split('T')[0];
   }, []);
 
-  // Max: Today + 15 Days
   const maxDeadlineDate = useMemo(() => {
     const date = new Date();
     date.setDate(date.getDate() + 15);
@@ -68,7 +66,6 @@ const AssignmentPage = () => {
     if (!/^[6-9]\d{9}$/.test(formData.phone)) v.phone = "Valid 10-digit WhatsApp required";
     if (!formData.subject.trim()) v.subject = "Subject is required";
     
-    // Range Check: 3 to 15 days
     if (!formData.deadline) {
       v.deadline = "Deadline is required";
     } else if (formData.deadline < minDeadlineDate) {
@@ -83,16 +80,27 @@ const AssignmentPage = () => {
     return Object.keys(v).length === 0;
   };
 
+  // 3. UPDATED SUBMISSION LOGIC
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return; 
 
     setIsSubmitting(true);
-    const trackingNum = Math.floor(10000 + Math.random() * 90000).toString();
-
+    
     try {
+      // A. Get the logged-in student's info
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("You must be logged in to place an order.");
+      }
+
+      const trackingNum = Math.floor(10000 + Math.random() * 90000).toString();
+
+      // B. Insert order with student_email for the Dashboard to find it later
       const { error } = await supabase.from('assignments').insert([{
         student_name: formData.name,
+        student_email: user.email, // 👈 CRITICAL FIX: Link order to student
         whatsapp_number: formData.phone,
         subject: formData.subject,
         deadline: formData.deadline,
@@ -102,6 +110,7 @@ const AssignmentPage = () => {
       }]);
 
       if (error) throw error;
+      
       setGeneratedTracking(trackingNum);
       setIsSubmitted(true);
     } catch (err) {
@@ -112,7 +121,6 @@ const AssignmentPage = () => {
   };
 
   // --- RENDERING PATHS ---
-
   if (isChecking) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
       <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
@@ -145,12 +153,12 @@ const AssignmentPage = () => {
 
   return (
     <PageTransition>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-slate-50 py-16 px-4">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-slate-50 py-16 px-4 font-medium">
         <div className="max-w-3xl mx-auto">
           
           <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
             <h1 className="text-5xl font-black text-slate-900 mb-4 tracking-tight italic uppercase">Syllabus<span className="text-blue-600">Spine</span></h1>
-            <p className="text-slate-500 font-medium text-lg">Premium academic fulfillment, tracked live.</p>
+            <p className="text-slate-500 font-medium text-lg italic">Premium academic fulfillment, tracked live.</p>
           </motion.header>
 
           <AnimatePresence mode="wait">
@@ -198,12 +206,12 @@ const AssignmentPage = () => {
                       required 
                       type="date" 
                       name="deadline" 
-                      min={minDeadlineDate} // 👈 Min 3 days
-                      max={maxDeadlineDate} // 👈 Max 15 days
+                      min={minDeadlineDate}
+                      max={maxDeadlineDate}
                       value={formData.deadline} 
                       onChange={handleChange}
-                      onKeyDown={(e) => e.preventDefault()} // No typing
-                      onClick={(e) => e.target.showPicker?.()} // Auto-open
+                      onKeyDown={(e) => e.preventDefault()} 
+                      onClick={(e) => e.target.showPicker?.()} 
                       className={`w-full bg-slate-50 border-2 rounded-2xl px-6 py-4 text-slate-900 outline-none transition-all cursor-pointer ${errors.deadline ? 'border-red-500' : 'border-slate-100 focus:border-blue-500'}`} 
                     />
                     {errors.deadline && <p className="text-red-500 text-[10px] font-black uppercase ml-2 tracking-tighter">{errors.deadline}</p>}
@@ -244,8 +252,8 @@ const AssignmentPage = () => {
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 150, delay: 0.2 }} className="w-24 h-24 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8 border border-green-200">
                   <CheckCircle size={50} />
                 </motion.div>
-                <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Request Logged!</h2>
-                <p className="text-slate-500 font-medium text-lg mb-10 max-w-sm mx-auto">Expert review in progress! We'll WhatsApp you within 15 mins.</p>
+                <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight uppercase italic">Request Logged!</h2>
+                <p className="text-slate-500 font-medium text-lg mb-10 max-w-sm mx-auto italic">Zehaha! Expert review in progress! We'll WhatsApp you within 15 mins.</p>
                 <div className="bg-slate-50 p-10 rounded-3xl border border-slate-100 inline-block shadow-inner">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">Order Tracking ID</p>
                   <p className="text-5xl font-black text-blue-600 tracking-tighter">{generatedTracking}</p>
@@ -256,7 +264,6 @@ const AssignmentPage = () => {
               </motion.div>
             )}
           </AnimatePresence>
-
         </div>
       </motion.div>
     </PageTransition>

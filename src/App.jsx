@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { supabase } from './lib/supabase';
-import { AnimatePresence } from 'framer-motion'; // ANIMATION IMPORT
+import { AnimatePresence } from 'framer-motion';
 
 // Layout & Pages
 import Navbar from './components/Navbar';
@@ -10,19 +10,20 @@ import Home from './pages/Home';
 import NotesPage from './pages/NotesPage';
 import AssignmentPage from './pages/AssignmentPage';
 import AdminDashboard from './pages/AdminDashboard';
+import UserDashboard from './pages/UserDashboard'; // 👈 NEW: Create this page
 import LoginPage from './pages/LoginPage';
 import CheckoutPage from './pages/CheckoutPage';
 import TrackOrder from './pages/TrackOrder'; 
 
 const ADMIN_EMAIL = 'syllabusspineadmins@gmail.com'; 
 
-// --- 1. NEW COMPONENT: Handles the page exit/entry animations ---
 const AnimatedRoutes = ({ session }) => {
-  const location = useLocation(); // This safely tracks page changes
+  const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/notes" element={<NotesPage />} />
         <Route path="/assignments" element={<AssignmentPage />} />
@@ -30,21 +31,30 @@ const AnimatedRoutes = ({ session }) => {
         <Route path="/track-order" element={<TrackOrder />} />
         <Route path="/login" element={<LoginPage />} />
 
+        {/* 1. THE STUDENT DASHBOARD (Normal User) */}
+        <Route
+          path="/dashboard"
+          element={
+            session ? <UserDashboard /> : <Navigate to="/login" />
+          }
+        />
+
+        {/* 2. THE ADMIN CONTROL (Restricted) */}
         <Route
           path="/admin-control"
           element={
             session?.user?.email === ADMIN_EMAIL
               ? <AdminDashboard />
-              : <Navigate to="/login" />
+              : <Navigate to="/dashboard" /> // 👈 If logged in but not admin, send to user dashboard
           }
         />
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </AnimatePresence>
   );
 };
 
-// --- 2. YOUR MAIN APP COMPONENT ---
 function App() {
   const [session, setSession] = useState(null);
   const [initializing, setInitializing] = useState(true);
@@ -75,7 +85,6 @@ function App() {
       <div className="min-h-screen flex flex-col bg-slate-50 antialiased">
         <Navbar session={session} />
         <main className="flex-grow">
-          {/* We swapped your <Routes> for our new Animated component here */}
           <AnimatedRoutes session={session} /> 
         </main>
         <Footer />
