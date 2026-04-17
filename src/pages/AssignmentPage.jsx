@@ -145,7 +145,7 @@ const AssignmentPage = () => {
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full bg-white p-12 rounded-[3rem] shadow-2xl border border-slate-100 text-center font-medium">
           <Clock className="text-orange-500 mx-auto mb-6" size={50} />
           <h2 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">Orders Paused</h2>
-          <p className="text-slate-500">Zehaha! We're at maximum capacity. Check back soon.</p>
+          <p className="text-slate-500">We're at maximum capacity! Check back soon...</p>
         </motion.div>
       </div>
     </PageTransition>
