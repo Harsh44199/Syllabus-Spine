@@ -39,7 +39,7 @@ const Home = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 md:h-3 md:w-3 bg-blue-500"></span>
             </span>
-            PREMIUM STUDY MATERIALS FOR CLASSES 9-12
+            PREMIUM STUDY MATERIALS
           </motion.div>
 
           <motion.h1 

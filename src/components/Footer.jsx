@@ -57,7 +57,7 @@ const Footer = () => {
                 <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
                   <Mail size={16} />
                 </div>
-                <span className="hover:text-slate-900 cursor-pointer">support@syllabusspine.com</span>
+                <span className="hover:text-slate-900 cursor-pointer">syllabusspine@gmail.com</span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center text-green-600">
@@ -91,7 +91,7 @@ const Footer = () => {
             <motion.a 
               whileHover={{ y: -3 }}
               whileTap={{ scale: 0.9 }}
-              href="mailto:support@syllabusspine.com" 
+              href="mailto:syllabusspine@gmail.com" 
               className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors shadow-sm"
             >
               <Mail size={20} />

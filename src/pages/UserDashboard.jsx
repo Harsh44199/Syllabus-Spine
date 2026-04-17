@@ -191,7 +191,7 @@ const UserDashboard = () => {
                         >
                             <AlertCircle className="text-slate-200 mx-auto mb-6" size={64} />
                             <h2 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">No Active Logs</h2>
-                            <p className="text-slate-400 font-medium mb-10 italic">Zehaha! You haven't requested any fulfillments yet.</p>
+                            <p className="text-slate-400 font-medium mb-10 italic">You haven't requested any fulfillments yet.</p>
                             <motion.button 
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}

@@ -253,7 +253,7 @@ const AssignmentPage = () => {
                   <CheckCircle size={50} />
                 </motion.div>
                 <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight uppercase italic">Request Logged!</h2>
-                <p className="text-slate-500 font-medium text-lg mb-10 max-w-sm mx-auto italic">Zehaha! Expert review in progress! We'll WhatsApp you within 15 mins.</p>
+                <p className="text-slate-500 font-medium text-lg mb-10 max-w-sm mx-auto italic">Expert review in progress! We'll WhatsApp you within 15 mins.</p>
                 <div className="bg-slate-50 p-10 rounded-3xl border border-slate-100 inline-block shadow-inner">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">Order Tracking ID</p>
                   <p className="text-5xl font-black text-blue-600 tracking-tighter">{generatedTracking}</p>
