@@ -33,15 +33,14 @@ const NotesGallery = ({ filter = 'All' }) => {
 
   // 3. THE NEW DOWNLOAD LOGIC (Auth Guard)
   const handleDownloadClick = async (fileUrl) => {
-    // Check if the user has an active session in Supabase
-    const { data: { session } } = await supabase.auth.getSession();
+    // Strict server check
+    const { data: { user }, error } = await supabase.auth.getUser();
     
-    if (session) {
-      // User is logged in -> Open the file
+    if (user && !error) {
       window.open(fileUrl, '_blank');
     } else {
-      // User is NOT logged in -> Redirect to Sign Up / Login page
-      // Change '/login' if your sign up route is named something else (like '/signup')
+      // Clear dead tokens and redirect
+      await supabase.auth.signOut();
       navigate('/login'); 
     }
   };

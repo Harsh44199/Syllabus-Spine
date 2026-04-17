@@ -17,7 +17,7 @@ const Home = () => {
       transition: { staggerChildren: 0.1 }
     }
   };
-  
+
   const itemVariants = {
     hidden: { opacity: 0, y: 15 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120 } }
@@ -25,13 +25,14 @@ const Home = () => {
 
   // 4. THE AUTH GUARD FOR ASSIGNMENTS
   const handleOrderClick = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session) {
-      // User is logged in, send them to the form
+    // getUser() forces a strict server check, ignoring dead local sessions
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (user && !error) {
       navigate('/assignments');
     } else {
-      // User is not logged in, send them to sign up
+      // Clear out any corrupted local storage just to be safe
+      await supabase.auth.signOut();
       navigate('/login');
     }
   };
@@ -39,7 +40,7 @@ const Home = () => {
   return (
     <PageTransition>
       <div className="h-auto bg-slate-50 flex flex-col items-center px-4 sm:px-6 pt-10 pb-16 md:pt-24 md:pb-32">
-        
+
         {/* HERO SECTION */}
         <div className="max-w-4xl mx-auto text-center mb-12 md:mb-28 mt-4 md:mt-0">
           <motion.div
@@ -54,7 +55,7 @@ const Home = () => {
             PREMIUM STUDY MATERIALS
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-[2.25rem] leading-[1.15] sm:text-5xl md:text-7xl font-black text-slate-900 tracking-tight mb-5 md:mb-8 md:leading-[1.1]"
@@ -63,7 +64,7 @@ const Home = () => {
             <span className="text-blue-600 block sm:inline mt-1 sm:mt-0">Save Your Time.</span>
           </motion.h1>
 
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -72,23 +73,23 @@ const Home = () => {
             Get instant access to top-tier notes or hire us to handle your complex assignments so you can focus on what actually matters.
           </motion.p>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 w-full max-w-xs mx-auto sm:max-w-none"
           >
             <Link to="/notes" className="w-full sm:w-auto">
-              <motion.button 
+              <motion.button
                 whileTap={{ scale: 0.97 }}
                 className="w-full px-6 py-3.5 md:px-8 md:py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg shadow-blue-200 flex items-center justify-center gap-2 text-sm md:text-base transition-colors hover:bg-blue-700"
               >
                 BROWSE LIBRARY <ArrowRight size={18} />
               </motion.button>
             </Link>
-            
+
             {/* 5. REPLACED LINK WITH OUR SMART BUTTON */}
-            <motion.button 
+            <motion.button
               onClick={handleOrderClick}
               whileTap={{ scale: 0.97 }}
               className="w-full sm:w-auto px-6 py-3.5 md:px-8 md:py-4 bg-white text-slate-900 border-2 border-slate-200 rounded-2xl font-black hover:bg-slate-50 text-sm md:text-base transition-colors"
@@ -100,28 +101,28 @@ const Home = () => {
         </div>
 
         {/* FEATURES GRID */}
-        <motion.div 
+        <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-50px" }}
           className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 w-full"
         >
-          <FeatureCard 
+          <FeatureCard
             variants={itemVariants}
             icon={<BookOpen className="w-5 h-5 md:w-6 md:h-6" />}
             color="blue"
             title="Verified Notes"
             desc="High-quality, syllabus-aligned PDFs instantly delivered to your WhatsApp."
           />
-          <FeatureCard 
+          <FeatureCard
             variants={itemVariants}
             icon={<Edit3 className="w-5 h-5 md:w-6 md:h-6" />}
             color="purple"
             title="Custom Assignments"
             desc="Stuck on a project? Send us the details and we'll handle the heavy lifting."
           />
-          <FeatureCard 
+          <FeatureCard
             variants={itemVariants}
             icon={<Clock className="w-5 h-5 md:w-6 md:h-6" />}
             color="green"
@@ -146,8 +147,8 @@ const FeatureCard = ({ variants, icon, color, title, desc }) => {
   };
 
   return (
-    <motion.div 
-      variants={variants} 
+    <motion.div
+      variants={variants}
       className="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 shadow-sm active:scale-[0.98] transition-transform flex flex-col items-center text-center md:items-start md:text-left"
     >
       <div className={`w-12 h-12 md:w-14 md:h-14 ${colorMap[color]} rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6`}>
