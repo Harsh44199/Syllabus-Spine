@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { AnimatePresence } from 'framer-motion';
+import { Analytics } from '@vercel/analytics/react';
 
 // Layout & Pages
 import Navbar from './components/Navbar';
@@ -88,6 +89,7 @@ function App() {
           <AnimatedRoutes session={session} /> 
         </main>
         <Footer />
+        <Analytics />
       </div>
     </Router>
   );
