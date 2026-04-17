@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
 
 const NotesGallery = ({ filter = 'All' }) => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // 2. Initialize the router navigation
 
   const fetchNotes = useCallback(async () => {
     try {
@@ -29,6 +31,21 @@ const NotesGallery = ({ filter = 'All' }) => {
     fetchNotes();
   }, [fetchNotes]);
 
+  // 3. THE NEW DOWNLOAD LOGIC (Auth Guard)
+  const handleDownloadClick = async (fileUrl) => {
+    // Check if the user has an active session in Supabase
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // User is logged in -> Open the file
+      window.open(fileUrl, '_blank');
+    } else {
+      // User is NOT logged in -> Redirect to Sign Up / Login page
+      // Change '/login' if your sign up route is named something else (like '/signup')
+      navigate('/login'); 
+    }
+  };
+
   if (loading) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 animate-pulse">
@@ -52,14 +69,16 @@ const NotesGallery = ({ filter = 'All' }) => {
             
             <div className="flex justify-between items-center mt-3 border-t border-slate-50 pt-3">
               <span className="text-base md:text-lg font-black">₹{note.price || '0'}</span>
-              <a 
-                href={note.file_url} 
-                target="_blank" 
-                rel="noreferrer"
-                className="bg-slate-900 text-white p-2 md:p-2.5 rounded-xl hover:bg-blue-600 transition-colors"
+              
+              {/* 4. CHANGED THE LINK TO A BUTTON */}
+              <button 
+                onClick={() => handleDownloadClick(note.file_url)}
+                className="bg-slate-900 text-white p-2 md:p-2.5 rounded-xl hover:bg-blue-600 transition-colors cursor-pointer active:scale-95"
               >
-                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              </a>
+                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+              </button>
             </div>
           </div>
         </div>

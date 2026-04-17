@@ -1,11 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // 1. Imported useNavigate
 import { motion } from 'framer-motion';
 import { BookOpen, Edit3, Clock, ArrowRight } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
+import { supabase } from '../lib/supabase'; // 2. Imported Supabase
 
 const Home = () => {
+  const navigate = useNavigate(); // 3. Initialized the navigator
   if (!motion) return null;
+
   // Animation Variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -18,6 +21,19 @@ const Home = () => {
   const itemVariants = {
     hidden: { opacity: 0, y: 15 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120 } }
+  };
+
+  // 4. THE AUTH GUARD FOR ASSIGNMENTS
+  const handleOrderClick = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // User is logged in, send them to the form
+      navigate('/assignments');
+    } else {
+      // User is not logged in, send them to sign up
+      navigate('/login');
+    }
   };
 
   return (
@@ -70,14 +86,16 @@ const Home = () => {
                 BROWSE LIBRARY <ArrowRight size={18} />
               </motion.button>
             </Link>
-            <Link to="/assignments" className="w-full sm:w-auto">
-              <motion.button 
-                whileTap={{ scale: 0.97 }}
-                className="w-full px-6 py-3.5 md:px-8 md:py-4 bg-white text-slate-900 border-2 border-slate-200 rounded-2xl font-black hover:bg-slate-50 text-sm md:text-base transition-colors"
-              >
-                ORDER ASSIGNMENT
-              </motion.button>
-            </Link>
+            
+            {/* 5. REPLACED LINK WITH OUR SMART BUTTON */}
+            <motion.button 
+              onClick={handleOrderClick}
+              whileTap={{ scale: 0.97 }}
+              className="w-full sm:w-auto px-6 py-3.5 md:px-8 md:py-4 bg-white text-slate-900 border-2 border-slate-200 rounded-2xl font-black hover:bg-slate-50 text-sm md:text-base transition-colors"
+            >
+              ORDER ASSIGNMENT
+            </motion.button>
+
           </motion.div>
         </div>
 
