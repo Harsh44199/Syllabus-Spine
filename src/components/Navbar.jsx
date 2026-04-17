@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react'; // Added icons for the mobile menu
+import { Menu, X } from 'lucide-react'; 
 
 const Navbar = ({ session }) => {
   // State to control the mobile menu
@@ -95,6 +95,8 @@ const Navbar = ({ session }) => {
             className="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl md:hidden pt-24 px-6 pb-6 flex flex-col"
           >
             <div className="flex flex-col gap-6 text-center text-2xl font-black mt-10">
+              {/* NEW HOME BUTTON HERE */}
+              <Link to="/" onClick={closeMenu} className="text-slate-700 hover:text-blue-600 py-2 border-b border-slate-100">Home</Link>
               <Link to="/notes" onClick={closeMenu} className="text-slate-700 hover:text-blue-600 py-2 border-b border-slate-100">Library</Link>
               <Link to="/assignments" onClick={closeMenu} className="text-slate-700 hover:text-blue-600 py-2 border-b border-slate-100">Order Assignments</Link>
               <Link to="/track-order" onClick={closeMenu} className="text-slate-700 hover:text-blue-600 py-2 border-b border-slate-100">Track Order</Link>
