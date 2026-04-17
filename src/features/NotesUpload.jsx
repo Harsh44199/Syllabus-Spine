@@ -1,66 +1,38 @@
 import React, { useState } from 'react';
-import { supabase } from '../lib/supabase';
+import NotesGallery from '../features/NotesGallery';
 
-const NotesUpload = ({ onUploadSuccess }) => {
-  const [uploading, setUploading] = useState(false);
-
-  const uploadFile = async (event) => {
-    try {
-      setUploading(true);
-      const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      // 1. Upload the file to the 'notes-files' bucket
-      let { error: uploadError } = await supabase.storage
-        .from('notes-files')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      // 2. Get the public URL for the database
-      const { data } = supabase.storage.from('notes-files').getPublicUrl(filePath);
-
-      // 3. Save the record to your 'notes' table
-      const { error: dbError } = await supabase
-        .from('notes')
-        .insert([{ 
-          title: file.name.replace('.pdf', ''), 
-          file_url: data.publicUrl,
-          category: 'Digital' 
-        }]);
-
-      if (dbError) throw dbError;
-      
-      alert('Note Uploaded Successfully!');
-      if (onUploadSuccess) onUploadSuccess();
-    } catch (error) {
-      alert('Error: ' + error.message);
-    } finally {
-      setUploading(false);
-    }
-  };
+const NotesPage = () => {
+  const [activeFilter, setActiveFilter] = useState('All');
 
   return (
-    <div className="p-6 bg-white border-2 border-dashed border-slate-200 rounded-3xl text-center">
-      <label className="cursor-pointer block">
-        <span className="text-sm font-bold text-slate-600 block mb-2">
-          {uploading ? 'Processing File...' : 'Upload New PDF Note'}
-        </span>
-        <input 
-          type="file" 
-          accept="application/pdf" 
-          onChange={uploadFile} 
-          disabled={uploading}
-          className="hidden" 
-        />
-        <div className="bg-blue-50 text-blue-600 py-3 rounded-xl font-bold hover:bg-blue-100 transition-all">
-          {uploading ? '⬆️ Uploading...' : 'Select PDF File'}
+    <div className="max-w-7xl mx-auto px-4 py-8 md:py-16">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-16">
+        <div>
+          <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-2 md:mb-4">The Library</h1>
+          <p className="text-sm md:text-base text-slate-500 font-medium">Browse our premium collection of syllabus-mapped notes.</p>
         </div>
-      </label>
+        
+        {/* Professional Filter Tabs (Now Scrollable on Mobile) */}
+        <div className="flex overflow-x-auto hide-scrollbar w-full md:w-auto bg-slate-100 p-1.5 rounded-2xl">
+          {['All', 'Digital', 'Handwritten'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveFilter(tab)}
+              className={`flex-1 md:flex-none whitespace-nowrap px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${
+                activeFilter === tab 
+                ? 'bg-white text-blue-600 shadow-sm' 
+                : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <NotesGallery filter={activeFilter} />
     </div>
   );
 };
 
-export default NotesUpload;
+export default NotesPage;
