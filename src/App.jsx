@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { AnimatePresence } from 'framer-motion';
-import { SpeedInsights } from "@vercel/speed-insights/react"
-import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 // Layout & Pages
 import Navbar from './components/Navbar';
@@ -12,7 +12,7 @@ import Home from './pages/Home';
 import NotesPage from './pages/NotesPage';
 import AssignmentPage from './pages/AssignmentPage';
 import AdminDashboard from './pages/AdminDashboard';
-import UserDashboard from './pages/UserDashboard'; // 👈 NEW: Create this page
+import UserDashboard from './pages/UserDashboard'; 
 import LoginPage from './pages/LoginPage';
 import CheckoutPage from './pages/CheckoutPage';
 import TrackOrder from './pages/TrackOrder'; 
@@ -28,7 +28,6 @@ const AnimatedRoutes = ({ session }) => {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/notes" element={<NotesPage />} />
-        {/* We moved assignments OUT of here! */}
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/track-order" element={<TrackOrder />} />
         <Route path="/login" element={<LoginPage />} />
@@ -61,8 +60,7 @@ const AnimatedRoutes = ({ session }) => {
           }
         />
 
-        <Route path="*" element={<Navigate to="/" />} />a
-
+        {/* Catch-all fallback */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </AnimatePresence>
@@ -98,10 +96,16 @@ function App() {
     <Router>
       <div className="min-h-screen flex flex-col bg-slate-50 antialiased">
         <Navbar session={session} />
+        
         <main className="flex-grow">
           <AnimatedRoutes session={session} /> 
         </main>
+        
         <Footer />
+
+        {/* VERCEL TRACKING COMPONENTS */}
+        <Analytics />
+        <SpeedInsights />
       </div>
     </Router>
   );
