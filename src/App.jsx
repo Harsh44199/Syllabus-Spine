@@ -28,12 +28,22 @@ const AnimatedRoutes = ({ session }) => {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/notes" element={<NotesPage />} />
-        <Route path="/assignments" element={<AssignmentPage />} />
+        {/* We moved assignments OUT of here! */}
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/track-order" element={<TrackOrder />} />
         <Route path="/login" element={<LoginPage />} />
 
-        {/* 1. THE STUDENT DASHBOARD (Normal User) */}
+        {/* --- PROTECTED ROUTES --- */}
+        
+        {/* 1. ORDER ASSIGNMENTS (Requires Login) */}
+        <Route 
+          path="/assignments" 
+          element={
+            session ? <AssignmentPage /> : <Navigate to="/login" />
+          } 
+        />
+
+        {/* 2. THE STUDENT DASHBOARD (Normal User) */}
         <Route
           path="/dashboard"
           element={
@@ -41,15 +51,17 @@ const AnimatedRoutes = ({ session }) => {
           }
         />
 
-        {/* 2. THE ADMIN CONTROL (Restricted) */}
+        {/* 3. THE ADMIN CONTROL (Restricted) */}
         <Route
           path="/admin-control"
           element={
             session?.user?.email === ADMIN_EMAIL
               ? <AdminDashboard />
-              : <Navigate to="/dashboard" /> // 👈 If logged in but not admin, send to user dashboard
+              : <Navigate to="/dashboard" />
           }
         />
+
+        <Route path="*" element={<Navigate to="/" />} />a
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

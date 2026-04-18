@@ -34,23 +34,26 @@ const AdminDashboard = () => {
   const [notes, setNotes] = useState([]);
   const [loadingNotes, setLoadingNotes] = useState(true);
   const [editingNote, setEditingNote] = useState(null); // Holds the note currently being edited
-
+  
+ // Initial Data Fetch & AUTH GUARD
   useEffect(() => {
     if (!motion) return null;
-    fetchGlobalSettings();
-    if (activeTab === 'orders') fetchOrders();
-    if (activeTab === 'library') fetchNotes();
-  }, [activeTab]);
+    const checkAuth = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (!user || error) {
+        // If not logged in, kick them to the login page immediately
+        window.location.href = '/login'; 
+        return;
+      }
+      
+      // If they ARE logged in, load the data
+      fetchGlobalSettings();
+      if (activeTab === 'orders') fetchOrders();
+      if (activeTab === 'library') fetchNotes();
+    };
 
-  // ==========================================
-  // AUTH LOGIC
-  // ==========================================
-  const handleLogout = async () => {
-    if (window.confirm("Are you sure you want to log out?")) {
-      await supabase.auth.signOut();
-      window.location.href = '/login';
-    }
-  };
+    checkAuth();
+  }, [activeTab]);
 
   // ==========================================
   // POWER SWITCH LOGIC
@@ -94,6 +97,13 @@ const AdminDashboard = () => {
     if (window.confirm("Delete this order permanently?")) {
       const { error } = await supabase.from('assignments').delete().eq('id', id);
       if (!error) fetchOrders();
+    }
+  };
+
+  const handleLogout = async () => {
+    if (window.confirm("Are you sure you want to log out?")) {
+      await supabase.auth.signOut();
+      window.location.href = '/login'; 
     }
   };
 

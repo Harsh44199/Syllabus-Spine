@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
-import { motion, AnimatePresence } from 'framer-motion'; 
-import { 
-  Send, Paperclip, Calendar, BookOpen, User, 
-  Phone, CheckCircle, Loader2, Clock, AlertTriangle, 
-  ChevronRight, ShieldCheck 
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Send, Paperclip, Calendar, BookOpen, User,
+  Phone, CheckCircle, Loader2, Clock, AlertTriangle,
+  ChevronRight, ShieldCheck
 } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 
 const AssignmentPage = () => {
+  const navigate = useNavigate();
   // 1. STATE & LOGIC
   const [formData, setFormData] = useState({
     name: '', phone: '', subject: '', deadline: '', details: ''
@@ -36,8 +38,21 @@ const AssignmentPage = () => {
   }, []);
 
   useEffect(() => {
-    const checkStatus = async () => {
+    const initializePage = async () => {
+      setIsChecking(true);
+
       try {
+        // A. Strict server check to defeat dead/expired tokens
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+          // If token is dead, clear the cache and kick them to login
+          await supabase.auth.signOut();
+          navigate('/login');
+          return; // Stop running the rest of the code
+        }
+
+        // B. User is valid! Now check if orders are paused in the database
         const { data, error } = await supabase.from('app_settings').select('*');
         if (error) throw error;
         if (data && data.length > 0) {
@@ -46,13 +61,14 @@ const AssignmentPage = () => {
           setDebugError("Settings (app_settings) table is empty.");
         }
       } catch (err) {
-        setDebugError("Supabase Error: " + err.message);
+        setDebugError("System Error: " + err.message);
       } finally {
         setIsChecking(false);
       }
     };
-    checkStatus();
-  }, []);
+
+    initializePage();
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -65,7 +81,7 @@ const AssignmentPage = () => {
     if (formData.name.trim().length < 3) v.name = "Full name required";
     if (!/^[6-9]\d{9}$/.test(formData.phone)) v.phone = "Valid 10-digit WhatsApp required";
     if (!formData.subject.trim()) v.subject = "Subject is required";
-    
+
     if (!formData.deadline) {
       v.deadline = "Deadline is required";
     } else if (formData.deadline < minDeadlineDate) {
@@ -75,7 +91,7 @@ const AssignmentPage = () => {
     }
 
     if (formData.details.trim().length < 10) v.details = "More instructions needed";
-    
+
     setErrors(v);
     return Object.keys(v).length === 0;
   };
@@ -83,10 +99,10 @@ const AssignmentPage = () => {
   // 3. UPDATED SUBMISSION LOGIC
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return; 
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
-    
+
     try {
       // A. Get the logged-in student's info
       const { data: { user } } = await supabase.auth.getUser();
@@ -110,7 +126,7 @@ const AssignmentPage = () => {
       }]);
 
       if (error) throw error;
-      
+
       setGeneratedTracking(trackingNum);
       setIsSubmitted(true);
     } catch (err) {
@@ -155,7 +171,7 @@ const AssignmentPage = () => {
     <PageTransition>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-slate-50 py-16 px-4 font-medium">
         <div className="max-w-3xl mx-auto">
-          
+
           <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
             <h1 className="text-5xl font-black text-slate-900 mb-4 tracking-tight italic uppercase">Syllabus<span className="text-blue-600">Spine</span></h1>
             <p className="text-slate-500 font-medium text-lg italic">Premium academic fulfillment, tracked live.</p>
@@ -163,7 +179,7 @@ const AssignmentPage = () => {
 
           <AnimatePresence mode="wait">
             {!isSubmitted ? (
-              <motion.form 
+              <motion.form
                 key="form"
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
                 onSubmit={handleSubmit}
@@ -172,7 +188,7 @@ const AssignmentPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-700 flex items-center gap-2 ml-2 tracking-tight">
-                      <User size={16} className="text-blue-500"/> Full Name
+                      <User size={16} className="text-blue-500" /> Full Name
                     </label>
                     <input required type="text" name="name" value={formData.name} onChange={handleChange}
                       className={`w-full bg-slate-50 border-2 rounded-2xl px-6 py-4 text-slate-900 outline-none transition-all ${errors.name ? 'border-red-500 shadow-sm' : 'border-slate-100 focus:border-blue-500'}`} />
@@ -181,7 +197,7 @@ const AssignmentPage = () => {
 
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-700 flex items-center gap-2 ml-2 tracking-tight">
-                      <Phone size={16} className="text-blue-500"/> WhatsApp
+                      <Phone size={16} className="text-blue-500" /> WhatsApp
                     </label>
                     <input required type="tel" name="phone" value={formData.phone} onChange={handleChange}
                       className={`w-full bg-slate-800/5 border-2 rounded-2xl px-6 py-4 text-slate-900 outline-none transition-all ${errors.phone ? 'border-red-500 shadow-sm' : 'border-slate-100 focus:border-blue-500'}`} />
@@ -192,7 +208,7 @@ const AssignmentPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-700 flex items-center gap-2 ml-2 tracking-tight">
-                      <BookOpen size={16} className="text-blue-500"/> Subject
+                      <BookOpen size={16} className="text-blue-500" /> Subject
                     </label>
                     <input required type="text" name="subject" value={formData.subject} onChange={handleChange}
                       className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 text-slate-900 outline-none focus:border-blue-500 transition-all" />
@@ -200,19 +216,19 @@ const AssignmentPage = () => {
 
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-700 flex items-center gap-2 ml-2 tracking-tight">
-                      <Calendar size={16} className="text-blue-500"/> Deadline (3-15 Days)
+                      <Calendar size={16} className="text-blue-500" /> Deadline (3-15 Days)
                     </label>
-                    <input 
-                      required 
-                      type="date" 
-                      name="deadline" 
+                    <input
+                      required
+                      type="date"
+                      name="deadline"
                       min={minDeadlineDate}
                       max={maxDeadlineDate}
-                      value={formData.deadline} 
+                      value={formData.deadline}
                       onChange={handleChange}
-                      onKeyDown={(e) => e.preventDefault()} 
-                      onClick={(e) => e.target.showPicker?.()} 
-                      className={`w-full bg-slate-50 border-2 rounded-2xl px-6 py-4 text-slate-900 outline-none transition-all cursor-pointer ${errors.deadline ? 'border-red-500' : 'border-slate-100 focus:border-blue-500'}`} 
+                      onKeyDown={(e) => e.preventDefault()}
+                      onClick={(e) => e.target.showPicker?.()}
+                      className={`w-full bg-slate-50 border-2 rounded-2xl px-6 py-4 text-slate-900 outline-none transition-all cursor-pointer ${errors.deadline ? 'border-red-500' : 'border-slate-100 focus:border-blue-500'}`}
                     />
                     {errors.deadline && <p className="text-red-500 text-[10px] font-black uppercase ml-2 tracking-tighter">{errors.deadline}</p>}
                   </div>
@@ -220,7 +236,7 @@ const AssignmentPage = () => {
 
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 flex items-center gap-2 ml-2 tracking-tight">
-                    <Paperclip size={16} className="text-blue-500"/> Assignment Instructions
+                    <Paperclip size={16} className="text-blue-500" /> Assignment Instructions
                   </label>
                   <textarea required name="details" rows="4" value={formData.details} onChange={handleChange}
                     className={`w-full bg-slate-50 border-2 rounded-2xl px-6 py-4 text-slate-900 outline-none transition-all resize-none ${errors.details ? 'border-red-500' : 'border-slate-100 focus:border-blue-500'}`}
@@ -229,7 +245,7 @@ const AssignmentPage = () => {
                 </div>
 
                 <div className="pt-6">
-                  <motion.button 
+                  <motion.button
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                     disabled={isSubmitting} type="submit"
                     className="w-full bg-blue-600 text-white py-6 rounded-3xl font-black text-xl shadow-xl shadow-blue-200 flex items-center justify-center gap-4 hover:bg-blue-700 transition-all disabled:opacity-70 group"
@@ -259,7 +275,7 @@ const AssignmentPage = () => {
                   <p className="text-5xl font-black text-blue-600 tracking-tighter">{generatedTracking}</p>
                 </div>
                 <div className="mt-12">
-                   <button onClick={() => setIsSubmitted(false)} className="text-slate-400 font-black text-sm uppercase tracking-widest hover:text-blue-600 transition-colors underline decoration-slate-200 underline-offset-8">New Order</button>
+                  <button onClick={() => setIsSubmitted(false)} className="text-slate-400 font-black text-sm uppercase tracking-widest hover:text-blue-600 transition-colors underline decoration-slate-200 underline-offset-8">New Order</button>
                 </div>
               </motion.div>
             )}
