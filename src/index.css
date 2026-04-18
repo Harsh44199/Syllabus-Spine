@@ -9,3 +9,28 @@ body {
   margin: 0;
   color: #0f172a;
 }
+
+/* --- PREMIUM SCROLLBAR --- */
+::-webkit-scrollbar {
+  width: 8px; /* Extremely thin */
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Invisible track */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* Tailwind slate-300 */
+  border-radius: 10px; /* Fully rounded edges */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* Darkens slightly when hovered */
+}
+
+/* Firefox compatibility */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
